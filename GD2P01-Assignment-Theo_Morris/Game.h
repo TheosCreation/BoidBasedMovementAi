@@ -33,7 +33,7 @@ private:
 	sf::Text debugText;
 
 	//Game objects
-	std::vector<Agent> agents;
+	std::vector<std::unique_ptr<Agent>> agents;
 
 	void initWindow();
 	void initGame();

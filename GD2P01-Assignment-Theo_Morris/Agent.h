@@ -18,7 +18,9 @@ enum class MovementBehavior {
 class Agent : public sf::Drawable
 {
 private:
+    sf::Texture m_texture;
     sf::Sprite m_sprite;
+
 public:
     Agent(int spawnPositionX, int spawnPositionY);
     ~Agent();

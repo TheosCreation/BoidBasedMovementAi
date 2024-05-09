@@ -59,10 +59,13 @@ const bool Game::isRunning() const
 
 void Game::spawnAgent(int spawnPositionX, int spawnPositionY)
 {
-	Agent newAgent(spawnPositionX, spawnPositionY);
-	agents.push_back(newAgent);
+	// Create a new Agent object dynamically
+	std::unique_ptr<Agent> newAgent = std::make_unique<Agent>(spawnPositionX, spawnPositionY);
 
-	std::cout << "Enemy spawned at location: " << spawnPositionX << ", " << spawnPositionY << std::endl;
+	// Store the smart pointer to the new Agent object in the agents vector
+	agents.push_back(std::move(newAgent));
+
+	std::cout << "Agent spawned at location: " << spawnPositionX << ", " << spawnPositionY << std::endl;
 }
 
 void Game::pollEvents()
@@ -117,12 +120,12 @@ void Game::update()
 
 void Game::render()
 {
-	window->clear(sf::Color::White);
+	window->clear(sf::Color::Black);
 
 	//Draw Game Objects
-	for (Agent& agent : agents)
+	for (const auto& agentPtr : agents)
 	{
-		window->draw(agent);
+		window->draw(*agentPtr);
 	}
 
 	//Draw Ui
