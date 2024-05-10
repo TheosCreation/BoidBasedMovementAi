@@ -47,7 +47,7 @@ public:
 
 	void spawnAgent(int spawnPositionX, int spawnPositionY);
 
-	void updateEnemies();
+	void updateAgents();
 	void updateMousePositions();
 
 	void pollEvents();

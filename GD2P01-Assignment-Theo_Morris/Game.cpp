@@ -91,8 +91,12 @@ void Game::pollEvents()
 	}
 }
 
-void::Game::updateEnemies()
+void::Game::updateAgents()
 {
+	for (const auto& agentPtr : agents)
+	{
+		agentPtr->update(window->getSize());
+	}
 }
 
 void::Game::updateMousePositions()
@@ -108,7 +112,7 @@ void Game::update()
 
 	updateMousePositions();
 
-	updateEnemies();
+	updateAgents();
 
 	std::stringstream ss;
 	ss << "Screen: " << mousePosScreen.x << " " << mousePosScreen.y << "\n"
