@@ -16,14 +16,14 @@ Agent::Agent(int spawnPositionX, int spawnPositionY)
     m_pos = sf::Vector2f(spawnPositionX, spawnPositionY);
     m_sprite.setPosition(m_pos);
 
-    m_rot = distribution(mersenne);
-    m_sprite.setRotation(m_rot); 
+    //m_rot = distribution(mersenne);
+    //m_sprite.setRotation(m_rot); 
     
     // Set a random velocity
-    float direction = m_rot * PI / 180.0f; // Convert rotation to radians
-    float speed = 2.0f; // Adjust speed as needed
-    m_velocity.x = std::cos(direction) * speed;
-    m_velocity.y = std::sin(direction) * speed;
+    //float direction = m_rot * PI / 180.0f; // Convert rotation to radians
+    //float speed = 2.0f; // Adjust speed as needed
+    //m_velocity.x = std::cos(direction) * speed;
+    //m_velocity.y = std::sin(direction) * speed;
 }
 
 Agent::~Agent()
@@ -37,6 +37,10 @@ void Agent::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 void Agent::update(float deltaTime, const sf::Vector2u& windowSize, const std::vector<std::unique_ptr<Agent>>& agents, const sf::Vector2i& target)
 {
+    // Update wander cooldown timer
+    wanderTick += deltaTime;
+    updateTick += deltaTime;
+
     // Initialize forces and counters
     sf::Vector2f cohesionForce(0.0f, 0.0f);
     sf::Vector2f alignmentForce(0.0f, 0.0f);
@@ -73,29 +77,42 @@ void Agent::update(float deltaTime, const sf::Vector2u& windowSize, const std::v
     float alignmentWeight = 1.0f;
     float separationWeight = 1.0f;
 
+    //if clicking then activate seek
+    float seekWeight = 0.0f;
+    float fleeWeight = 1.0f;
+    float wanderWeight = 1.0f;
+
     ///////////////////////////////////////////////////////////
 
     //if pursue behaviour 
     sf::Vector2f targetDisplacement = sf::Vector2f(target - targetPreviousPos);
 
     targetPreviousPos = target;
-
+    
     sf::Vector2f targetVelocity = targetDisplacement / deltaTime;
     //////////////////////////////////////////////////////////////////////////////
+    sf::Vector2f wanderForce;
+    if (wanderTick > WANDERCOOLDOWNDURATION)
+    {
+        wanderForce = wander();
+        wanderTick = 0.0f;
+    }
+    wanderForce *= wanderWeight;
+    
+    sf::Vector2f seekForce = seek(sf::Vector2f(target));
+    seekForce *= seekWeight;
 
     if (cohesionCount > 0) {
         // Calculate average position of nearby agents for cohesion
         cohesionForce /= static_cast<float>(cohesionCount);
 
         // Apply movement behaviour towards the mouse position
-        cohesionForce = pursue((sf::Vector2f)target, targetVelocity) * cohesionWeight;
+        cohesionForce *= cohesionWeight;
     }
 
     if (alignmentCount > 0) {
         // Calculate average velocity of nearby agents for alignment
         alignmentForce /= static_cast<float>(alignmentCount);
-        normalize(alignmentForce);
-        alignmentForce *= MAX_SPEED;
         alignmentForce *= alignmentWeight;
     }
 
@@ -104,21 +121,24 @@ void Agent::update(float deltaTime, const sf::Vector2u& windowSize, const std::v
         separationForce /= static_cast<float>(separationCount);
 
         // Apply movement behaviour towards the mouse position
-        separationForce = pursue((sf::Vector2f)target, targetVelocity) * separationWeight;
+
+        separationForce *= separationWeight;
     }
 
     // Calculate total force
-    sf::Vector2f totalForce = cohesionForce + alignmentForce + separationForce;
+    sf::Vector2f totalForce = cohesionForce + alignmentForce + separationForce + wanderForce + seekForce;
+
     if (vectorMagnitude(totalForce) > MAX_FORCE) {
-        normalize(totalForce);
-        totalForce *= MAX_FORCE;
+        totalForce = normalize(totalForce) * MAX_FORCE;
     }
+
+    sf::Vector2f acceleration = totalForce / MASS;
+    m_velocity += acceleration * deltaTime;
 
     // Update velocity
     m_velocity += totalForce;
     if (vectorMagnitude(m_velocity) > MAX_SPEED) {
-        normalize(m_velocity);
-        m_velocity *= MAX_SPEED;
+        m_velocity = normalize(m_velocity) * MAX_SPEED;
     }
 
     // Update position
@@ -141,7 +161,7 @@ sf::Vector2f Agent::seek(const sf::Vector2f& target)
 
     // Check if the distance is greater than zero to avoid division by zero
     if (distance > 0) {
-        normalize(desiredVelocity);
+        desiredVelocity = normalize(desiredVelocity);
 
         // Scale the desired velocity to the maximum speed
         desiredVelocity *= MAX_SPEED;
@@ -150,7 +170,7 @@ sf::Vector2f Agent::seek(const sf::Vector2f& target)
         sf::Vector2f steering = desiredVelocity - m_velocity;
 
         // Normalize the steering force and scale it to the maximum force
-        normalize(steering);
+        steering = normalize(steering);
         steering *= MAX_FORCE;
 
         return steering;
@@ -169,7 +189,7 @@ sf::Vector2f Agent::flee(const sf::Vector2f& target)
 
     // Check if the distance is greater than zero to avoid division by zero
     if (distance > 0) {
-        normalize(desiredVelocity);
+        desiredVelocity = normalize(desiredVelocity);
 
         // Scale the desired velocity to the maximum speed
         desiredVelocity *= MAX_SPEED;
@@ -178,7 +198,7 @@ sf::Vector2f Agent::flee(const sf::Vector2f& target)
         sf::Vector2f steering = desiredVelocity - m_velocity;
 
         // Normalize the steering force and scale it to the maximum force
-        normalize(steering);
+        steering = normalize(steering);
         steering *= MAX_FORCE;
 
         return steering;
@@ -209,7 +229,19 @@ sf::Vector2f Agent::evade(const sf::Vector2f& targetPos, const sf::Vector2f& tar
 
 sf::Vector2f Agent::wander()
 {
-    float distance = m_velocity;
+    // Find center of circle
+    sf::Vector2f direction = normalize(m_velocity);
+    sf::Vector2f center = m_pos + direction * WANDERLENGTH;
+
+    // Random walk
+    float randomAngle = distribution(mersenne);
+    m_rot += randomAngle;
+    float x = WANDERRAD * std::cos(m_rot);
+    float y = WANDERRAD * std::sin(m_rot);
+    sf::Vector2f offset(x, y);
+    sf::Vector2f target = center + offset;
+
+    return seek(target);
 }
 
 sf::Vector2f Agent::arrival(const sf::Vector2f& target)
@@ -220,7 +252,7 @@ sf::Vector2f Agent::arrival(const sf::Vector2f& target)
 
     // Check if the distance is greater than zero to avoid division by zero
     if (distance > 0) {
-        normalize(desiredVelocity);
+        desiredVelocity = normalize(desiredVelocity);
 
         if (distance < ARRIVAL_RADIUS)
         {
@@ -235,7 +267,7 @@ sf::Vector2f Agent::arrival(const sf::Vector2f& target)
         sf::Vector2f steering = desiredVelocity - m_velocity;
 
         // Normalize the steering force and scale it to the maximum force
-        normalize(steering);
+        steering = normalize(steering);
         steering *= MAX_FORCE;
 
         return steering;

@@ -17,12 +17,14 @@ inline void wrapPosition(sf::Vector2f& position, const sf::Vector2u& windowSize)
         position.y = 0;
 }
 
-inline void normalize(sf::Vector2f& vector)
+inline sf::Vector2f normalize(sf::Vector2f vector)
 {
+    sf::Vector2f normalisedVector;
     float magnitude = std::sqrt(vector.x * vector.x + vector.y * vector.y);
     if (magnitude != 0) {
-        vector /= magnitude;
+        normalisedVector = vector / magnitude;
     }
+    return normalisedVector;
 }
 
 inline float vectorMagnitude(sf::Vector2f vector)

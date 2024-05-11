@@ -14,11 +14,17 @@ const float PI = 3.14159265359f;
 const float NEIGHBOR_RADIUS = 100.0f;
 const float SEPARATION_RADIUS = 50.0f;
 const float MAX_SPEED = 0.1f;
-const float MAX_FORCE = 0.01f;
+const float MAX_FORCE = 0.05f;
+const float MASS = 2.0f;
+
+const float WANDERRAD = 50.0f;
+const float WANDERLENGTH = 1.0f;
 
 const float ARRIVAL_RADIUS = 300.0f;
 // good ranges 0.5-1.0
-const float PREDICTION_TIME = 0.5f;
+const float PREDICTION_TIME = 0.5f; 
+
+const float WANDERCOOLDOWNDURATION = 1.0f;
 
 enum class MovementBehavior {
     Seek,
@@ -39,9 +45,12 @@ private:
     sf::Vector2f m_pos;
     sf::Vector2f m_velocity;
     float m_rot;
-    float m_acceleration;
 
     sf::Vector2i targetPreviousPos;
+
+    float updateTick = 0.0f;
+
+    float wanderTick = WANDERCOOLDOWNDURATION;
 
 public:
     Agent(int spawnPositionX, int spawnPositionY);
@@ -59,6 +68,9 @@ public:
     // pursue/evade
     sf::Vector2f pursue(const sf::Vector2f& targetPos, const sf::Vector2f& targetVel);
     sf::Vector2f evade(const sf::Vector2f& targetPos, const sf::Vector2f& targetVel);
+
+    // wander
+    sf::Vector2f wander();
 
     //arrival
     sf::Vector2f arrival(const sf::Vector2f& target);
