@@ -24,6 +24,7 @@ private:
 	sf::Vector2i windowSize;
 	sf::RenderWindow* window;
 	sf::Event event;
+	sf::Clock clock;
 
 	sf::Vector2i mousePosScreen;
 	sf::Vector2i mousePosWindow;
@@ -47,8 +48,8 @@ public:
 
 	void spawnAgent(int spawnPositionX, int spawnPositionY);
 
-	void updateAgents();
-	void updateMousePositions();
+	void updateAgents(float deltaTime);
+	void updateMousePositions(float deltaTime);
 
 	void pollEvents();
 	void update();

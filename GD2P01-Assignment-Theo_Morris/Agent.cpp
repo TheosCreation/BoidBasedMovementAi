@@ -35,7 +35,7 @@ void Agent::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(m_sprite, states);
 }
 
-void Agent::update(const sf::Vector2u& windowSize, const std::vector<std::unique_ptr<Agent>>& agents)
+void Agent::update(float deltaTime, const sf::Vector2u& windowSize, const std::vector<std::unique_ptr<Agent>>& agents, const sf::Vector2i& target)
 {
     // Initialize forces and counters
     sf::Vector2f cohesionForce(0.0f, 0.0f);
@@ -73,10 +73,22 @@ void Agent::update(const sf::Vector2u& windowSize, const std::vector<std::unique
     float alignmentWeight = 1.0f;
     float separationWeight = 1.0f;
 
+    ///////////////////////////////////////////////////////////
+
+    //if pursue behaviour 
+    sf::Vector2f targetDisplacement = sf::Vector2f(target - targetPreviousPos);
+
+    targetPreviousPos = target;
+
+    sf::Vector2f targetVelocity = targetDisplacement / deltaTime;
+    //////////////////////////////////////////////////////////////////////////////
+
     if (cohesionCount > 0) {
         // Calculate average position of nearby agents for cohesion
         cohesionForce /= static_cast<float>(cohesionCount);
-        cohesionForce = seek(cohesionForce) * cohesionWeight;
+
+        // Apply movement behaviour towards the mouse position
+        cohesionForce = pursue((sf::Vector2f)target, targetVelocity) * cohesionWeight;
     }
 
     if (alignmentCount > 0) {
@@ -90,7 +102,9 @@ void Agent::update(const sf::Vector2u& windowSize, const std::vector<std::unique
     if (separationCount > 0) {
         // Calculate separation force
         separationForce /= static_cast<float>(separationCount);
-        separationForce = seek(getPosition() + separationForce) * separationWeight;
+
+        // Apply movement behaviour towards the mouse position
+        separationForce = pursue((sf::Vector2f)target, targetVelocity) * separationWeight;
     }
 
     // Calculate total force
@@ -123,16 +137,99 @@ sf::Vector2f Agent::seek(const sf::Vector2f& target)
 {
     // Calculate desired velocity
     sf::Vector2f desiredVelocity = target - m_pos;
-    float distanceSquared = desiredVelocity.x * desiredVelocity.x + desiredVelocity.y * desiredVelocity.y;
+    float distance = vectorMagnitude(desiredVelocity);
 
-    // Check if the distance squared is greater than zero to avoid division by zero
-    if (distanceSquared > 0) {
-        // Calculate the distance and normalize the desired velocity
-        float distance = std::sqrt(distanceSquared);
-        desiredVelocity /= distance;
+    // Check if the distance is greater than zero to avoid division by zero
+    if (distance > 0) {
+        normalize(desiredVelocity);
 
         // Scale the desired velocity to the maximum speed
         desiredVelocity *= MAX_SPEED;
+
+        // Calculate steering force
+        sf::Vector2f steering = desiredVelocity - m_velocity;
+
+        // Normalize the steering force and scale it to the maximum force
+        normalize(steering);
+        steering *= MAX_FORCE;
+
+        return steering;
+    }
+    else {
+        // If the agent is already at the target position, return zero steering force
+        return sf::Vector2f(0.0f, 0.0f);
+    }
+}
+
+sf::Vector2f Agent::flee(const sf::Vector2f& target)
+{
+    // Calculate desired velocity
+    sf::Vector2f desiredVelocity = m_pos - target;
+    float distance = vectorMagnitude(desiredVelocity);
+
+    // Check if the distance is greater than zero to avoid division by zero
+    if (distance > 0) {
+        normalize(desiredVelocity);
+
+        // Scale the desired velocity to the maximum speed
+        desiredVelocity *= MAX_SPEED;
+
+        // Calculate steering force
+        sf::Vector2f steering = desiredVelocity - m_velocity;
+
+        // Normalize the steering force and scale it to the maximum force
+        normalize(steering);
+        steering *= MAX_FORCE;
+
+        return steering;
+    }
+    else {
+        // If the agent is already at the target position, return zero steering force
+        return sf::Vector2f(0.0f, 0.0f);
+    }
+}
+
+sf::Vector2f Agent::pursue(const sf::Vector2f& targetPos, const sf::Vector2f& targetVel)
+{
+    // Calculate the future position of the target based on its velocity
+    sf::Vector2f futurePosition = targetPos + targetVel * PREDICTION_TIME;
+
+    // Call the seek function with the future position of the target
+    return seek(futurePosition);
+}
+
+sf::Vector2f Agent::evade(const sf::Vector2f& targetPos, const sf::Vector2f& targetVel)
+{
+    // Calculate the future position of the target based on its velocity
+    sf::Vector2f futurePosition = targetPos + targetVel * PREDICTION_TIME;
+
+    // Call the flee function with the future position of the target
+    return flee(futurePosition);
+}
+
+sf::Vector2f Agent::wander()
+{
+    float distance = m_velocity;
+}
+
+sf::Vector2f Agent::arrival(const sf::Vector2f& target)
+{
+    // Calculate desired velocity
+    sf::Vector2f desiredVelocity = target - m_pos;
+    float distance = vectorMagnitude(desiredVelocity);
+
+    // Check if the distance is greater than zero to avoid division by zero
+    if (distance > 0) {
+        normalize(desiredVelocity);
+
+        if (distance < ARRIVAL_RADIUS)
+        {
+            desiredVelocity *= MAX_SPEED * (distance / ARRIVAL_RADIUS);
+        }
+        else
+        {
+            desiredVelocity *= MAX_SPEED;
+        }
 
         // Calculate steering force
         sf::Vector2f steering = desiredVelocity - m_velocity;

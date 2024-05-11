@@ -15,7 +15,7 @@ Mail : theo.morris@mds.ac.nz
 
 void Game::initWindow()
 {
-	windowSize = sf::Vector2i(800, 600);
+	windowSize = sf::Vector2i(1000, 1000);
 	window = new sf::RenderWindow(sf::VideoMode(windowSize.x, windowSize.y), "window");
 }
 
@@ -91,14 +91,14 @@ void Game::pollEvents()
 	}
 }
 
-void::Game::updateAgents()
+void::Game::updateAgents(float deltaTime)
 {
 	for (auto& agentPtr : agents) {
-		agentPtr->update(window->getSize(), agents);
+		agentPtr->update(deltaTime, window->getSize(), agents, mousePosWindow);
 	}
 }
 
-void::Game::updateMousePositions()
+void::Game::updateMousePositions(float deltaTime)
 {
 	mousePosScreen = sf::Mouse::getPosition();
 	mousePosWindow = sf::Mouse::getPosition(*window);
@@ -109,9 +109,11 @@ void Game::update()
 {
 	pollEvents();
 
-	updateMousePositions();
+	float dt = clock.restart().asSeconds();
 
-	updateAgents();
+	updateMousePositions(dt);
+
+	updateAgents(dt);
 
 	std::stringstream ss;
 	ss << "Screen: " << mousePosScreen.x << " " << mousePosScreen.y << "\n"

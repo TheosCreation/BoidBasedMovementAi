@@ -16,6 +16,10 @@ const float SEPARATION_RADIUS = 50.0f;
 const float MAX_SPEED = 0.1f;
 const float MAX_FORCE = 0.01f;
 
+const float ARRIVAL_RADIUS = 300.0f;
+// good ranges 0.5-1.0
+const float PREDICTION_TIME = 0.5f;
+
 enum class MovementBehavior {
     Seek,
     Pursue,
@@ -37,6 +41,8 @@ private:
     float m_rot;
     float m_acceleration;
 
+    sf::Vector2i targetPreviousPos;
+
 public:
     Agent(int spawnPositionX, int spawnPositionY);
     ~Agent();
@@ -44,9 +50,18 @@ public:
     // Override the draw function to make the agent drawable
     void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-    void update(const sf::Vector2u& windowSize, const std::vector<std::unique_ptr<Agent>>& agents);
+    void update(float deltaTime, const sf::Vector2u& windowSize, const std::vector<std::unique_ptr<Agent>>& agents, const sf::Vector2i& target);
+
+    // seek/flee
     sf::Vector2f seek(const sf::Vector2f& target);
-    sf::Vector2f separate(const std::vector<std::unique_ptr<Agent>>& agents);
+    sf::Vector2f flee(const sf::Vector2f& target);
+
+    // pursue/evade
+    sf::Vector2f pursue(const sf::Vector2f& targetPos, const sf::Vector2f& targetVel);
+    sf::Vector2f evade(const sf::Vector2f& targetPos, const sf::Vector2f& targetVel);
+
+    //arrival
+    sf::Vector2f arrival(const sf::Vector2f& target);
 
     sf::Vector2f getPosition() const { return m_pos; }
     sf::Vector2f getVelocity() const { return m_velocity; }
