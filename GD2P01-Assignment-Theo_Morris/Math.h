@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
+#include <SFML/System/Vector2.hpp>
 
 // Declare the function as inline to avoid linker errors
 inline void wrapPosition(sf::Vector2f& position, const sf::Vector2u& windowSize) {
@@ -23,4 +23,16 @@ inline void normalize(sf::Vector2f& vector)
     if (magnitude != 0) {
         vector /= magnitude;
     }
+}
+
+inline float vectorMagnitude(sf::Vector2f vector)
+{
+    return std::sqrt(vector.x * vector.x + vector.y * vector.y);
+}
+
+inline float vectorDistance(sf::Vector2f vectorA, sf::Vector2f vectorB)
+{
+    float deltaX = vectorB.x - vectorA.x;
+    float deltaY = vectorB.y - vectorA.y;
+    return std::sqrt(deltaX * deltaX + deltaY * deltaY);
 }
