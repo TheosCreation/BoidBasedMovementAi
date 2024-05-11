@@ -93,9 +93,8 @@ void Game::pollEvents()
 
 void::Game::updateAgents()
 {
-	for (const auto& agentPtr : agents)
-	{
-		agentPtr->update(window->getSize());
+	for (auto& agentPtr : agents) {
+		agentPtr->update(window->getSize(), agents);
 	}
 }
 
@@ -117,7 +116,8 @@ void Game::update()
 	std::stringstream ss;
 	ss << "Screen: " << mousePosScreen.x << " " << mousePosScreen.y << "\n"
 		<< "Window: " << mousePosWindow.x << " " << mousePosWindow.y << "\n"
-		<< "View: " << mousePosView.x << " " << mousePosView.y << "\n";
+		<< "View: " << mousePosView.x << " " << mousePosView.y << "\n"
+		<< "Agents: " << agents.size() << "\n";
 
 	debugText.setString(ss.str());
 }
