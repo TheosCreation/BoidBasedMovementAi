@@ -32,7 +32,7 @@ const float WANDERNOICE = 0.1f;
 
 const float AVOIDANCE_DISTANCE = 20.0f;
 
-const float QUEUE_DISTANCE = 20.0f;
+const float QUEUE_DISTANCE = 50.0f;
 
 const float ARRIVAL_RADIUS = 300.0f;
 

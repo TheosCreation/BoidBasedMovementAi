@@ -46,6 +46,7 @@ void Agent::initializeWeights(MovementBehavior movementType) {
     switch (movementType) {
     case MovementBehavior::Seek:
         avoidanceWeight = 2.0f;
+        separationWeight = 1.0f;
         seekWeight = 1.0f;
         break;
     case MovementBehavior::Flee:
@@ -55,24 +56,28 @@ void Agent::initializeWeights(MovementBehavior movementType) {
         break;
     case MovementBehavior::Pursue:
         avoidanceWeight = 2.0f;
+        separationWeight = 1.0f;
         pursuitWeight = 1.0f;
         break;
     case MovementBehavior::Evade:
         avoidanceWeight = 2.0f;
+        separationWeight = 1.0f;
         evadeWeight = 1.0f;
         break;
     case MovementBehavior::Wander:
         avoidanceWeight = 2.0f;
+        separationWeight = 1.0f;
         wanderWeight = 1.0f;
         break;
     case MovementBehavior::Arrival:
         avoidanceWeight = 2.0f;
+        separationWeight = 1.0f;
         arrivalWeight = 1.0f;
         break;
     case MovementBehavior::Flocking:
         cohesionWeight = 1.0f;
         alignmentWeight = 1.0f;
-        separationWeight = 2.0f;
+        separationWeight = 1.5f;
         avoidanceWeight = 2.0f;
         break;
     case MovementBehavior::FollowLeader:
@@ -82,7 +87,8 @@ void Agent::initializeWeights(MovementBehavior movementType) {
         break;
     case MovementBehavior::Queue:
         avoidanceWeight = 2.0f;
-        queueingWeight = 1.0f;
+        separationWeight = 1.0f;
+        queueingWeight = 1.5f;
         break;
     default:
         break;
