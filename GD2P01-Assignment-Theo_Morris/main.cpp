@@ -5,7 +5,7 @@ Auckland
 New Zealand
 (c) 2024 Media Design School
 File Name : main.cpp
-Description :
+Description : Entry point for the program. It initializes the game and runs the game loop.
 Author : Theo Morris
 Mail : theo.morris@mds.ac.nz
 **/

@@ -5,7 +5,7 @@ Auckland
 New Zealand
 (c) 2024 Media Design School
 File Name : Game.h
-Description :
+Description : Declaration of the Game class, which manages the main game loop and controls game objects and user interface elements.
 Author : Theo Morris
 Mail : theo.morris@mds.ac.nz
 **/
@@ -15,14 +15,19 @@ Mail : theo.morris@mds.ac.nz
 #include <iostream>
 #include <vector>
 #include "Agent.h"
+#include "Obstacle.h"
+#include "Button.h"
 
 #include <SFML/Graphics.hpp>
 
 class Game
 {
 private:
-	sf::Vector2i windowSize;
-	sf::RenderWindow* window;
+	sf::Vector2i gameWindowSize;
+	sf::RenderWindow* gameWindow;
+
+	sf::Vector2i uiWindowSize;
+	sf::RenderWindow* uiWindow;
 	sf::Event event;
 	sf::Clock clock;
 
@@ -33,20 +38,33 @@ private:
 	sf::Font font;
 	sf::Text debugText;
 
+	float buttonWidth = 260.0f;
+	float buttonHeight = 60.0f;
+	float buttonSpacing = 15.0f;
+
+	std::vector<std::unique_ptr<Button>> behaviourButtons;
+	std::vector<std::unique_ptr<Button>> functionalButtons;
+
 	//Game objects
 	std::vector<std::unique_ptr<Agent>> agents;
+	std::vector<std::unique_ptr<Obstacle>> obstacles;
+
+	MovementBehavior currentSelectedBehaviour = MovementBehavior::Wander;
 
 	void initWindow();
+	void initUiWindow();
 	void initGame();
 	void initUi();
-	void initAgents();
+	void initObstacles();
+
 public:
 	Game();
 	~Game();
 
 	const bool isRunning() const;
 
-	void spawnAgent(int spawnPositionX, int spawnPositionY);
+	void spawnAgent(int spawnPositionX, int spawnPositionY, MovementBehavior agentMovementBehaviour);
+	void spawnObstacle(float spawnPositionX, float spawnPositionY, float radius);
 
 	void updateAgents(float deltaTime);
 	void updateMousePositions(float deltaTime);
@@ -54,4 +72,5 @@ public:
 	void pollEvents();
 	void update();
 	void render();
+	void reset();
 };
