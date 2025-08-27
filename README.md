@@ -1,6 +1,6 @@
 # Ai-mini-project-2 Theo Morris
 
-![my_video.mov](https://www.youtube.com/watch?v=KONj1mj6cJg)
+https://www.youtube.com/watch?v=KONj1mj6cJg
 
 To spawn in a agent into the scene click anywhere on the window and it will spawn a agent.
 
