@@ -1,4 +1,4 @@
-# Ai-mini-project-2 Theo Morris
+# BoidBasedMovementAi - Theo Morris
 
 https://www.youtube.com/watch?v=KONj1mj6cJg
 
