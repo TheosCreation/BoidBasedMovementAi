@@ -1,6 +1,5 @@
 # BoidBasedMovementAi - Theo Morris
-
-https://www.youtube.com/watch?v=KONj1mj6cJg
+[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/hqdefault.jpg)](https://www.youtube.com/watch?v=KONj1mj6cJg)
 
 To spawn in a agent into the scene click anywhere on the window and it will spawn a agent.
 
