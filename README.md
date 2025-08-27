@@ -1,5 +1,7 @@
 # BoidBasedMovementAi - Theo Morris
 
+[![Video thumbnail](https://img.youtube.com/vi/KONj1mj6cJg/hqdefault.jpg)](https://www.youtube.com/watch?v=KONj1mj6cJg)  
+
 [![Watch on YouTube](https://img.shields.io/badge/▶%20Watch-red?logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=KONj1mj6cJg)
 
 To spawn in a agent into the scene click anywhere on the window and it will spawn a agent.
